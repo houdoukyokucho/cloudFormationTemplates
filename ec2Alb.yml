@@ -1,0 +1,224 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation Template Test"
+# Setting key and IP
+Parameters:
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+  AllowedIP:
+    Description: IP address allowed to access EC2
+    Type: String
+    Default: 0.0.0.0/0
+
+Resources:
+  ########################################################
+  ### VPC
+  ########################################################
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
+      InstanceTenancy: "default"
+      Tags:
+        - Key: Name
+          Value: "hoge-vpc"
+
+  ########################################################
+  ### Subnet
+  ########################################################
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: "10.0.0.0/24"
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: "hoge-public-subnet-1"
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: "10.0.1.0/24"
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: "hoge-public-subnet-2"
+
+  ########################################################
+  ### InternetGateway
+  ########################################################
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: "hoge-igw"
+  HogeAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  ########################################################
+  ### Route Table
+  ########################################################
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub hoge-public-routetable
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  # Subnet to attach
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  ########################################################
+  ### EC2
+  ########################################################
+  EC2A:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-00d101850e971728d
+      KeyName: !Ref KeyName
+      InstanceType: t2.micro
+      NetworkInterfaces: # assign public IP
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId: !Ref PublicSubnetA
+          GroupSet:
+            - !Ref EC2SG
+      UserData: !Base64 | # coding commands what you want
+        #!/bin/bash
+        sudo amazon-linux-extras install -y nginx1
+        sudo systemctl start nginx
+      Tags:
+        - Key: Name
+          Value: hogeEC2A
+  EC2B:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-00d101850e971728d
+      KeyName: !Ref KeyName
+      InstanceType: t2.micro
+      NetworkInterfaces: # assign public IP
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId: !Ref PublicSubnetB
+          GroupSet:
+            - !Ref EC2SG
+      UserData: !Base64 | # coding commands what you want
+        #!/bin/bash
+        sudo amazon-linux-extras install -y nginx1
+        sudo systemctl start nginx
+      Tags:
+        - Key: Name
+          Value: hogeEC2B
+
+  ########################################################
+  ### EC2 Security Group
+  ########################################################
+  EC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: hoge-sg
+      GroupDescription: Allow SSH and HTTP access only AllowedIP
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        # http
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref AllowedIP
+        # ssh
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedIP
+
+  ########################################################
+  ### Target group
+  ########################################################
+  TargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      VpcId: !Ref VPC
+      Name: "hoge-target-group"
+      Protocol: HTTP
+      Port: 80
+      TargetType: instance
+      Targets:
+        - Id: !Ref EC2A
+        - Id: !Ref EC2B
+          Port: 80
+
+  ########################################################
+  ###  ALB security group
+  ########################################################
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: hoge-alb-sg
+      GroupDescription: Allow HTTP access
+      VpcId: !Ref VPC
+      # Rule
+      SecurityGroupIngress:
+        # http
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+
+  ########################################################
+  ###  ALB
+  ########################################################
+  InternetALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: hoge-alb
+      Scheme: "internet-facing"
+      LoadBalancerAttributes:
+        - Key: "deletion_protection.enabled"
+          Value: false
+        - Key: "idle_timeout.timeout_seconds"
+          Value: 60
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref TargetGroup
+          Type: forward
+      LoadBalancerArn: !Ref InternetALB
+      Port: 80
+      Protocol: HTTP
+Outputs:
+  # Output EC2A status
+  EC2APublicIP:
+    Value: !GetAtt EC2A.PublicIp
+    Description: Public IP of EC2A Ainstance
+  # Output EC2B status
+  EC2BPublicIP:
+    Value: !GetAtt EC2A.PublicIp
+    Description: Public IP of EC2B Ainstance
