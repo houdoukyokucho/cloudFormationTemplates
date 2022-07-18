@@ -6,4 +6,4 @@
 
 ## [simpleFargate](./simpleFargate.yml)
 
-![simpleFargate](./simpleFargate.yml)
+![simpleFargate](./simpleFargate.png)
