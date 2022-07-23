@@ -15,3 +15,7 @@
 ## [ec2Alb](./ec2Alb.yml)
 
 ![ec2Alb](./ec2Alb.png)
+
+## [ec2AlbRds](./ec2AlbRds.yml)
+
+![ec2AlbRds](./ec2AlbRds.png)
