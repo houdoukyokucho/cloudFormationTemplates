@@ -12,10 +12,10 @@
 
 ![ec2](./ec2/image.png)
 
-## [simpleEC2](./simpleEC2.yml)
-
-![simpleEC2](./simpleEC2.png)
-
 ## [ec2Aurora](./ec2Aurora/template.yml)
 
 ![ec2Aurora](./ec2Aurora/image.png)
+
+## [ec2Simple](./ec2Simple/template.yml)
+
+![ec2Simple](./ec2Simple/image.png)
