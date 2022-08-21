@@ -1,8 +1,8 @@
 # README
 
-## [createEcr](./createEcr.yml)
+## [ecr](./ecr/template.yml)
 
-![createEcr](./createEcr.png)
+![ecr](./ecr/image.png)
 
 ## [simpleFargate](./simpleFargate.yml)
 
