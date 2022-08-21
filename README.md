@@ -8,13 +8,13 @@
 
 ![fargate](./fargate/image.png)
 
+## [ec2](./ec2/template.yml)
+
+![ec2](./ec2/image.png)
+
 ## [simpleEC2](./simpleEC2.yml)
 
 ![simpleEC2](./simpleEC2.png)
-
-## [ec2Alb](./ec2Alb.yml)
-
-![ec2Alb](./ec2Alb.png)
 
 ## [ec2AlbRds](./ec2AlbRds.yml)
 
