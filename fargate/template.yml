@@ -37,7 +37,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub "${ProjectName}-public-subnet-1a"
-  PublicSubnetB:
+  PublicSubnetC:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: "ap-northeast-1c"
@@ -71,10 +71,10 @@ Resources:
       SubnetId: !Ref PublicSubnetA
       RouteTableId: !Ref PublicRouteTable
   # attach to SubnetB
-  PublicSubnetBRouteTableAssociation:
+  PublicSubnetCRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PublicSubnetC
       RouteTableId: !Ref PublicRouteTable
 
   ########################################################
@@ -138,7 +138,7 @@ Resources:
         - !Ref ALBSecurityGroup
       Subnets:
         - !Ref PublicSubnetA
-        - !Ref PublicSubnetB
+        - !Ref PublicSubnetC
 
   ########################################################
   ### ALB Listener
@@ -218,7 +218,7 @@ Resources:
       ServiceName: !Sub "${ProjectName}-service-a"
       TaskDefinition: !Ref EcsTaskDefinition
 
-  EcsServiceB:
+  EcsServiceC:
     Type: AWS::ECS::Service
     DependsOn: ALBListener
     Properties:
@@ -235,8 +235,8 @@ Resources:
           SecurityGroups:
             - !Ref ALBSecurityGroup
           Subnets:
-            - !Ref PublicSubnetB
-      ServiceName: !Sub "${ProjectName}-service-b"
+            - !Ref PublicSubnetC
+      ServiceName: !Sub "${ProjectName}-service-c"
       TaskDefinition: !Ref EcsTaskDefinition
 
   ########################################################
