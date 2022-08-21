@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Create ECS Task Test
 
 Parameters:
+  ProjectName:
+    Type: String
+    Description: "project name is being prefix"
+    Default: ""
   ImageUri:
     Type: String
     Default: ""
@@ -19,7 +23,7 @@ Resources:
       InstanceTenancy: "default"
       Tags:
         - Key: Name
-          Value: "hoge-vpc"
+          Value: !Sub "${ProjectName}-vpc"
 
   ########################################################
   ### Subnet
@@ -32,7 +36,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: "hoge-public-subnet-a"
+          Value: !Sub "${ProjectName}-public-subnet-1a"
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
@@ -41,7 +45,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: "hoge-public-subnet-b"
+          Value: !Sub "${ProjectName}-public-subnet-1c"
 
   ########################################################
   ### Route Table
@@ -52,7 +56,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: "hoge-public-routetable"
+          Value: !Sub "${ProjectName}-public-routetable"
   # way to InternetGateway
   PublicRoute:
     Type: AWS::EC2::Route
@@ -81,7 +85,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: "hoge-igw"
+          Value: !Sub "${ProjectName}-internet-gateway"
   Attachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
