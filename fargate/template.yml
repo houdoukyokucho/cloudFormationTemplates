@@ -99,7 +99,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       VpcId: !Ref VPC
-      Name: "hoge-target-group"
+      Name: !Sub "${ProjectName}-target-group"
       Protocol: HTTP
       Port: 80
       TargetType: ip
@@ -110,7 +110,7 @@ Resources:
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: "hoge-alb-sg"
+      GroupName: !Sub "${ProjectName}-alb-securitygroup"
       GroupDescription: "Allow HTTP access"
       VpcId: !Ref VPC
       # Rule
@@ -127,7 +127,7 @@ Resources:
   InternetALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: "hoge-alb"
+      Name: !Sub "${ProjectName}-alb"
       Scheme: "internet-facing"
       LoadBalancerAttributes:
         - Key: "deletion_protection.enabled"
@@ -159,7 +159,7 @@ Resources:
   EcsTaskExecRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: "hoge-ecs-task-exec-role-policy"
+      RoleName: !Sub "${ProjectName}-ecs-task-exec-role-policy"
       Path: /
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -179,14 +179,14 @@ Resources:
     Properties:
       Cpu: 256
       ExecutionRoleArn: !Ref EcsTaskExecRole
-      Family: "hoge-ecs-task"
+      Family: !Sub "${ProjectName}-ecs-task"
       Memory: 512
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
       ### ContainerDefinitions
       ContainerDefinitions:
-        - Name: "hoge-ecs-container"
+        - Name: !Sub "${ProjectName}-container"
           Image: !Ref ImageUri
           MemoryReservation: 128
           PortMappings:
@@ -207,7 +207,7 @@ Resources:
       LoadBalancers:
         - TargetGroupArn: !Ref TargetGroup
           ContainerPort: 80
-          ContainerName: "hoge-ecs-container"
+          ContainerName: !Sub "${ProjectName}-container"
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
@@ -215,7 +215,7 @@ Resources:
             - !Ref ALBSecurityGroup
           Subnets:
             - !Ref PublicSubnetA
-      ServiceName: "hoge-ecs-service-a"
+      ServiceName: !Sub "${ProjectName}-service-a"
       TaskDefinition: !Ref EcsTaskDefinition
 
   EcsServiceB:
@@ -228,7 +228,7 @@ Resources:
       LoadBalancers:
         - TargetGroupArn: !Ref TargetGroup
           ContainerPort: 80
-          ContainerName: "hoge-ecs-container"
+          ContainerName: !Sub "${ProjectName}-container"
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
@@ -236,7 +236,7 @@ Resources:
             - !Ref ALBSecurityGroup
           Subnets:
             - !Ref PublicSubnetB
-      ServiceName: "hoge-ecs-service-b"
+      ServiceName: !Sub "${ProjectName}-service-b"
       TaskDefinition: !Ref EcsTaskDefinition
 
   ########################################################
@@ -245,7 +245,7 @@ Resources:
   EcsCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: "hoge-ecs-cluster"
+      ClusterName: !Sub "${ProjectName}-cluster"
 
 Outputs:
   EcsCluster:
