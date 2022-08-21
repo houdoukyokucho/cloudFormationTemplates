@@ -16,6 +16,6 @@
 
 ![simpleEC2](./simpleEC2.png)
 
-## [ec2AlbRds](./ec2AlbRds.yml)
+## [ec2Aurora](./ec2Aurora/template.yml)
 
-![ec2AlbRds](./ec2AlbRds.png)
+![ec2Aurora](./ec2Aurora/image.png)
