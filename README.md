@@ -4,9 +4,9 @@
 
 ![ecr](./ecr/image.png)
 
-## [simpleFargate](./simpleFargate.yml)
+## [fargate](./fargate/template.yml)
 
-![simpleFargate](./simpleFargate.png)
+![fargate](./fargate/image.png)
 
 ## [simpleEC2](./simpleEC2.yml)
 
