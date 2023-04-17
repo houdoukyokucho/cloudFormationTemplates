@@ -9,10 +9,6 @@ Parameters:
   ImageUri:
     Type: String
     Default: ""
-  HostedZoneName:
-    Type: String
-    Description: "input domain"
-    Default: ""
 
 Resources:
   ########################################################
@@ -253,25 +249,6 @@ Resources:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Sub "${ProjectName}-cluster"
-
-  ########################################################
-  ### Route53
-  ########################################################
-  Route53HostedZone:
-    Type: AWS::Route53::HostedZone
-    Properties:
-      Name: !Sub "${HostedZoneName}"
-  route53Record:
-    Type: AWS::Route53::RecordSetGroup
-    Properties:
-      HostedZoneName: !Sub "${HostedZoneName}."
-      Comment: ""
-      RecordSets:
-        - Name: !Sub "${HostedZoneName}."
-          Type: A
-          AliasTarget:
-            HostedZoneId: !GetAtt "InternetALB.CanonicalHostedZoneID"
-            DNSName: !GetAtt "InternetALB.DNSName"
 
 Outputs:
   EcsCluster:
